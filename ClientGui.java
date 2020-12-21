@@ -24,6 +24,8 @@ public class ClientGui extends Thread{
   private String serverName;
   private int PORT;
   private String name;
+
+  boolean isLoggedIn = false;
   BufferedReader input;
   PrintWriter output;
   Socket server;
@@ -83,6 +85,11 @@ public class ClientGui extends Thread{
     buttonSend.setFont(font);
     buttonSend.setBounds(575, 410, 100, 35);
 
+    // button log out
+    final JButton buttonLogOut = new JButton("Log out");
+    buttonLogOut.setFont(font);
+    buttonLogOut.setBounds(25,410,130,35);
+
 
     // Log in screen
     final JLabel labelUsername = new JLabel("Username:");
@@ -93,19 +100,36 @@ public class ClientGui extends Thread{
     final JButton buttonRegister = new JButton("Register");
     final JButton buttonDisconnect = new JButton("Disconnect");
 
-    // Set log in components position
+    // Set log in components positions and fonts
     labelUsername.setBounds(25, 340,135,40);
     labelUsername.setFont(font);
-    labelPassword.setBounds(200,340,135,40);
+    labelPassword.setBounds(170,340,135,40);
     labelPassword.setFont(font);
     textFieldUsername.setBounds(25, 370,135,40);
-    textFieldPassword.setBounds(200,370,135,40);
-    buttonLogIn.setBounds(450,370,100,40);
+    textFieldPassword.setBounds(170,370,135,40);
+    buttonLogIn.setBounds(465,370,100,40);
     buttonLogIn.setFont(font);
     buttonRegister.setBounds(575,370,100,40);
     buttonRegister.setFont(font);
     buttonDisconnect.setBounds(500, 415, 130, 40);
     buttonDisconnect.setFont(font);
+
+    // Register screen
+    // reuse label and text field from log in screen
+    final JLabel labelConfirmPassword = new JLabel("Confirm Password:");
+    final JPasswordField textFieldConfirmPassword = new JPasswordField();
+    final JButton buttonRegisterRequest = new JButton("Register");
+    final JButton buttonRegisterCancel = new JButton("Cancel");
+
+    // Set register components positions and fonts
+    labelConfirmPassword.setBounds(315,340,135,40);
+    labelConfirmPassword.setFont(font);
+    textFieldConfirmPassword.setBounds(315,370,135,40);
+    buttonRegisterRequest.setBounds(465,370,100,40);
+    buttonRegisterRequest.setFont(font);
+    buttonRegisterCancel.setBounds(575, 370, 100, 40);
+    buttonRegisterCancel.setFont(font);
+
 
 
     // Connection screen
@@ -121,35 +145,27 @@ public class ClientGui extends Thread{
     //textFieldServerPort.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
     //textFieldServerIP.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
 
-    // Set connection components position
+    // Set connection components positions and fonts
     buttonConnect.setFont(font);
     labelServerIP.setBounds(25, 340,135,40);
     labelServerIP.setFont(font);
-    labelServerPort.setBounds(200,340,135,40);
+    labelServerPort.setBounds(170,340,135,40);
     labelServerPort.setFont(font);
     textFieldServerIP.setBounds(25, 370, 135, 40);
     //jtfName.setBounds(375, 370, 135, 40);
-    textFieldServerPort.setBounds(200, 370, 135, 40);
-    buttonConnect.setBounds(450, 370, 100, 40);
-
+    textFieldServerPort.setBounds(170, 370, 135, 40);
+    buttonConnect.setBounds(465, 370, 100, 40);
 
 
     // Add components
     frame.add(scrollPaneMessageBoard);
     frame.add(scrollPaneUserList);
-//    frame.add(jtfName);
     frame.add(labelServerIP);
     frame.add(labelServerPort);
     frame.add(textFieldServerPort);
     frame.add(textFieldServerIP);
     frame.add(buttonConnect);
-//    frame.add(labelUsername);
-//    frame.add(labelPassword);
-//    frame.add(textFieldUsername);
-//    frame.add(textFieldPassword);
-//    frame.add(buttonLogIn);
-//    frame.add(buttonRegister);
-//    frame.add(buttonDisconnect);
+
 
 
     frame.setVisible(true);
@@ -194,20 +210,78 @@ public class ClientGui extends Thread{
       }
     });
 
-    // On log in
+    // On log in button
     buttonLogIn.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        String username = textFieldUsername.getText().trim();
+        String password = new String(textFieldPassword.getPassword()).trim();
+        if(username.equals("") || password.equals(""))
+        {
+          JOptionPane.showMessageDialog(frame, "Username and Password must not be empty");
+        }
+        else {
+          output.println("LOGIN|"+username+"|"+password);
 
+          textPaneMessageBoard.setBackground(Color.WHITE);
+          textPaneUserList.setBackground(Color.WHITE);
+        }
 
       }
     });
 
-    // On register
+    // On log in -> register button
     buttonRegister.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        // add register component
+        frame.add(labelConfirmPassword);
+        frame.add(textFieldConfirmPassword);
+        frame.add(buttonRegisterRequest);
+        frame.add(buttonRegisterCancel);
 
+        // remove login component
+        frame.remove(buttonLogIn);
+        frame.remove(buttonRegister);
+        frame.remove(buttonDisconnect);
+
+        frame.revalidate();
+        frame.repaint();
+        textPaneUserList.setText(null);
+        textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
+        textPaneUserList.setBackground(Color.LIGHT_GRAY);
+      }
+    });
+
+    // On register -> register button
+    buttonRegisterRequest.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+      }
+    });
+
+    // On return to login from register
+    buttonRegisterCancel.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // add login component
+
+        frame.add(buttonLogIn);
+        frame.add(buttonRegister);
+        frame.add(buttonDisconnect);
+
+        // remove login component
+        frame.remove(labelConfirmPassword);
+        frame.remove(textFieldConfirmPassword);
+        frame.remove(buttonRegisterRequest);
+        frame.remove(buttonRegisterCancel);
+
+        frame.revalidate();
+        frame.repaint();
+        textPaneUserList.setText(null);
+        textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
+        textPaneUserList.setBackground(Color.LIGHT_GRAY);
       }
     });
 
@@ -253,8 +327,7 @@ public class ClientGui extends Thread{
 
           frame.revalidate();
           frame.repaint();
-          textPaneMessageBoard.setBackground(Color.WHITE);
-          textPaneUserList.setBackground(Color.WHITE);
+
         } catch (Exception ex) {
           appendToPane(textPaneMessageBoard, "<span>Could not connect to server</span>");
           JOptionPane.showMessageDialog(frame, "Connection refused");
