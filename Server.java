@@ -1,10 +1,9 @@
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -19,6 +18,7 @@ public class Server {
   private int port;
   private List<User> clients;
   private ServerSocket server;
+  final private String userDataFileDirectory = "user.dat";
   public static JTextPane messageBoard;
 
 
@@ -66,7 +66,39 @@ public class Server {
       // accepts a new client
       Socket client = server.accept();
       appendToPane(messageBoard, "New client at: " + client.getRemoteSocketAddress() + "\n");
-      // get nickname of newUser
+
+      // Get log in or register request
+      String request = (new Scanner(client.getInputStream())).nextLine();
+      ArrayList<String> listRequestDetail = new ArrayList<>(Arrays.asList(request.split("//|")));
+      if(listRequestDetail.get(0).equals("LOG_IN"))
+      {
+        PrintWriter output = new PrintWriter(client.getOutputStream(), true);
+        // Log in success
+        if(authorizeLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
+          // create new User
+          User newUser = new User(client,listRequestDetail.get(1));
+
+          // add newUser message to list
+          this.clients.add(newUser);
+
+          // Send log in authorization
+          output.println("LOG_IN_SUCCESS");
+
+          // Welcome msg
+          newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
+          new Thread(new UserHandler(this, newUser)).start();
+        }
+        // Log in fail
+        else{
+          output.println("LOG_IN_FAIL");
+        }
+        output.close();
+      }
+      else if (listRequestDetail.get(0).equals("REGISTER"))
+      {
+
+      }
+
       String nickname = (new Scanner ( client.getInputStream() )).nextLine();
       nickname = nickname.replace(",", ""); //  ',' use for serialisation
       nickname = nickname.replace(" ", "_");
@@ -77,6 +109,7 @@ public class Server {
 
       // add newUser message to list
       this.clients.add(newUser);
+
 
       // Welcome msg
       newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
@@ -133,6 +166,22 @@ public class Server {
     }
   }
 
+  public boolean authorizeLogIn(String username, String password){
+    try{
+      BufferedReader reader = new BufferedReader(new FileReader(userDataFileDirectory));
+      String line;
+      while((line=reader.readLine())!=null){
+        String[] combo = line.split(" ");
+        if(combo[0].equals(username)  && combo[1].equals(password))
+          return true;
+      }
+      reader.close();
+    }
+    catch(IOException e){
+      e.printStackTrace();
+    }
+    return false;
+  }
 }
 
 class UserHandler implements Runnable {

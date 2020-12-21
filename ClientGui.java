@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 public class ClientGui extends Thread{
 
+  final JFrame frame = new JFrame("Chat");
   final JTextPane textPaneMessageBoard = new JTextPane(); // Message field
   final JTextPane textPaneUserList = new JTextPane(); // User list field
   final JTextField textFieldInputChat = new JTextField(); // Input message field
@@ -25,7 +26,7 @@ public class ClientGui extends Thread{
   private int PORT;
   private String name;
 
-  boolean isLoggedIn = false;
+  int logInState = 0; // 0: not login, 1: Logged in, 2: Log in fail
   BufferedReader input;
   PrintWriter output;
   Socket server;
@@ -38,7 +39,7 @@ public class ClientGui extends Thread{
     String fontFamily = "Arial, sans-serif";
     Font font = new Font(fontFamily, Font.PLAIN, 15);
 
-    final JFrame frame = new JFrame("Chat");
+
     frame.getContentPane().setLayout(null);
     frame.setSize(700, 500);
     frame.setResizable(false);
@@ -221,10 +222,7 @@ public class ClientGui extends Thread{
           JOptionPane.showMessageDialog(frame, "Username and Password must not be empty");
         }
         else {
-          output.println("LOGIN|"+username+"|"+password);
-
-          textPaneMessageBoard.setBackground(Color.WHITE);
-          textPaneUserList.setBackground(Color.WHITE);
+          output.println("LOG_IN|"+username+"|"+password);
         }
 
       }
@@ -451,7 +449,15 @@ public class ClientGui extends Thread{
               for (String user : ListUser) {
                 appendToPane(textPaneUserList, "@" + user);
               }
-            }else{
+            }
+            // if Server sent a log in authorization
+            else if(message.equals("LOG_IN_SUCCESS")){
+              // render Chatting Screen
+            }
+            else if(message.equals("LOG_IN_FAIL")){
+              JOptionPane.showMessageDialog(frame,"Wrong Username or Password");
+            }
+            else{
               appendToPane(textPaneMessageBoard, message);
             }
           }
