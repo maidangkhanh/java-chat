@@ -65,7 +65,7 @@ public class Server {
     while (true) {
       // accepts a new client
       Socket client = server.accept();
-
+      appendToPane(messageBoard, "New client at: " + client.getRemoteSocketAddress() + "\n");
       // get nickname of newUser
       String nickname = (new Scanner ( client.getInputStream() )).nextLine();
       nickname = nickname.replace(",", ""); //  ',' use for serialisation

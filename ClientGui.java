@@ -16,9 +16,9 @@ import java.util.Arrays;
 
 public class ClientGui extends Thread{
 
-  final JTextPane jtextFilDiscu = new JTextPane(); // Message field
-  final JTextPane jtextListUsers = new JTextPane(); // User list field
-  final JTextField jtextInputChat = new JTextField(); // Input message field
+  final JTextPane textPaneMessageBoard = new JTextPane(); // Message field
+  final JTextPane textPaneUserList = new JTextPane(); // User list field
+  final JTextField textFieldInputChat = new JTextField(); // Input message field
   private String oldMsg = "";
   private Thread read;
   private String serverName;
@@ -36,109 +36,127 @@ public class ClientGui extends Thread{
     String fontFamily = "Arial, sans-serif";
     Font font = new Font(fontFamily, Font.PLAIN, 15);
 
-    final JFrame jfr = new JFrame("Chat");
-    jfr.getContentPane().setLayout(null);
-    jfr.setSize(700, 500);
-    jfr.setResizable(false);
-    jfr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    final JFrame frame = new JFrame("Chat");
+    frame.getContentPane().setLayout(null);
+    frame.setSize(700, 500);
+    frame.setResizable(false);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+
+    // Chatting screen
     // Message field
-    jtextFilDiscu.setBounds(25, 25, 490, 320);
-    jtextFilDiscu.setFont(font);
-    jtextFilDiscu.setMargin(new Insets(6, 6, 6, 6));
-    jtextFilDiscu.setEditable(false);
-    JScrollPane jtextFilDiscuSP = new JScrollPane(jtextFilDiscu);
-    jtextFilDiscuSP.setBounds(25, 25, 490, 320);
+    textPaneMessageBoard.setBounds(25, 25, 490, 320);
+    textPaneMessageBoard.setFont(font);
+    textPaneMessageBoard.setMargin(new Insets(6, 6, 6, 6));
+    textPaneMessageBoard.setEditable(false);
+    JScrollPane scrollPaneMessageBoard = new JScrollPane(textPaneMessageBoard);
+    scrollPaneMessageBoard.setBounds(25, 25, 490, 320);
 
-    jtextFilDiscu.setContentType("text/html");
-    jtextFilDiscu.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+    textPaneMessageBoard.setContentType("text/html");
+    textPaneMessageBoard.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 
     // Users list field
-    jtextListUsers.setBounds(520, 25, 156, 320);
-    jtextListUsers.setEditable(true);
-    jtextListUsers.setFont(font);
-    jtextListUsers.setMargin(new Insets(6, 6, 6, 6));
-    jtextListUsers.setEditable(false);
-    JScrollPane jsplistuser = new JScrollPane(jtextListUsers);
-    jsplistuser.setBounds(520, 25, 156, 320);
+    textPaneUserList.setBounds(520, 25, 156, 320);
+    textPaneUserList.setEditable(true);
+    textPaneUserList.setFont(font);
+    textPaneUserList.setMargin(new Insets(6, 6, 6, 6));
+    textPaneUserList.setEditable(false);
+    JScrollPane scrollPaneUserList = new JScrollPane(textPaneUserList);
+    scrollPaneUserList.setBounds(520, 25, 156, 320);
 
-    jtextListUsers.setContentType("text/html");
-    jtextListUsers.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+    textPaneUserList.setContentType("text/html");
+    textPaneUserList.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 
     // Set background color for text pane
-    jtextFilDiscu.setBackground(Color.LIGHT_GRAY);
-    jtextListUsers.setBackground(Color.LIGHT_GRAY);
+    textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
+    textPaneUserList.setBackground(Color.LIGHT_GRAY);
 
     // Input message Field
-    jtextInputChat.setBounds(0, 350, 400, 50);
-    jtextInputChat.setFont(font);
-    jtextInputChat.setMargin(new Insets(6, 6, 6, 6));
-    final JScrollPane jtextInputChatSP = new JScrollPane(jtextInputChat);
-    jtextInputChatSP.setBounds(25, 350, 650, 50);
+    textFieldInputChat.setBounds(0, 350, 400, 50);
+    textFieldInputChat.setFont(font);
+    textFieldInputChat.setMargin(new Insets(6, 6, 6, 6));
+    final JScrollPane scrollPaneInputChat = new JScrollPane(textFieldInputChat);
+    scrollPaneInputChat.setBounds(25, 350, 650, 50);
 
     // button send
-    final JButton jsbtn = new JButton("Send");
-    jsbtn.setFont(font);
-    jsbtn.setBounds(575, 410, 100, 35);
-
-    // button Disconnect
-    final JButton jsbtndeco = new JButton("Disconnect");
-    jsbtndeco.setFont(font);
-    jsbtndeco.setBounds(25, 410, 130, 35);
-
-
+    final JButton buttonSend = new JButton("Send");
+    buttonSend.setFont(font);
+    buttonSend.setBounds(575, 410, 100, 35);
 
 
     // Log in screen
     final JLabel labelUsername = new JLabel("Username:");
     final JLabel labelPassword = new JLabel("Password:");
     final JTextField textFieldUsername = new JTextField();
-    final JTextField textFieldPassword = new JTextField();
-    final JButton logInButton = new JButton("Log In");
-    final JButton registerButton = new JButton("Register");
+    final JPasswordField textFieldPassword = new JPasswordField();
+    final JButton buttonLogIn = new JButton("Log In");
+    final JButton buttonRegister = new JButton("Register");
+    final JButton buttonDisconnect = new JButton("Disconnect");
 
-    labelUsername.setBounds(25, 330,135,40);
-    labelPassword.setBounds(200,330,135,40);
-    textFieldUsername.setBounds(25, 360,135,40);
-    textFieldPassword.setBounds(200,360,135,40);
-    logInButton.setBounds(410,360,100,40);
-    registerButton.setBounds(575,360,100,40);
+    // Set log in components position
+    labelUsername.setBounds(25, 340,135,40);
+    labelUsername.setFont(font);
+    labelPassword.setBounds(200,340,135,40);
+    labelPassword.setFont(font);
+    textFieldUsername.setBounds(25, 370,135,40);
+    textFieldPassword.setBounds(200,370,135,40);
+    buttonLogIn.setBounds(450,370,100,40);
+    buttonLogIn.setFont(font);
+    buttonRegister.setBounds(575,370,100,40);
+    buttonRegister.setFont(font);
+    buttonDisconnect.setBounds(500, 415, 130, 40);
+    buttonDisconnect.setFont(font);
+
 
     // Connection screen
-    final JTextField jtfName = new JTextField(this.name);
-    final JTextField jtfport = new JTextField(Integer.toString(this.PORT));
-    final JTextField jtfAddr = new JTextField(this.serverName);
-    final JButton jcbtn = new JButton("Connect");
+    //final JTextField jtfName = new JTextField(this.name);
+    final JLabel labelServerIP = new JLabel("Server IP:");
+    final JLabel labelServerPort = new JLabel("Port:");
+    final JTextField textFieldServerPort = new JTextField(Integer.toString(this.PORT));
+    final JTextField textFieldServerIP = new JTextField(this.serverName);
+    final JButton buttonConnect = new JButton("Connect");
 
     // check if those field are not empty
-    jtfName.getDocument().addDocumentListener(new TextListener(jtfName, jtfport, jtfAddr, jcbtn));
-    jtfport.getDocument().addDocumentListener(new TextListener(jtfName, jtfport, jtfAddr, jcbtn));
-    jtfAddr.getDocument().addDocumentListener(new TextListener(jtfName, jtfport, jtfAddr, jcbtn));
+    //jtfName.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
+    //textFieldServerPort.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
+    //textFieldServerIP.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
 
-    // Set components position
-    jcbtn.setFont(font);
-    jtfAddr.setBounds(25, 360, 135, 40);
-    jtfName.setBounds(375, 360, 135, 40);
-    jtfport.setBounds(200, 360, 135, 40);
-    jcbtn.setBounds(575, 360, 100, 40);
+    // Set connection components position
+    buttonConnect.setFont(font);
+    labelServerIP.setBounds(25, 340,135,40);
+    labelServerIP.setFont(font);
+    labelServerPort.setBounds(200,340,135,40);
+    labelServerPort.setFont(font);
+    textFieldServerIP.setBounds(25, 370, 135, 40);
+    //jtfName.setBounds(375, 370, 135, 40);
+    textFieldServerPort.setBounds(200, 370, 135, 40);
+    buttonConnect.setBounds(450, 370, 100, 40);
 
 
 
     // Add components
+    frame.add(scrollPaneMessageBoard);
+    frame.add(scrollPaneUserList);
+//    frame.add(jtfName);
+    frame.add(labelServerIP);
+    frame.add(labelServerPort);
+    frame.add(textFieldServerPort);
+    frame.add(textFieldServerIP);
+    frame.add(buttonConnect);
+//    frame.add(labelUsername);
+//    frame.add(labelPassword);
+//    frame.add(textFieldUsername);
+//    frame.add(textFieldPassword);
+//    frame.add(buttonLogIn);
+//    frame.add(buttonRegister);
+//    frame.add(buttonDisconnect);
 
-    jfr.add(jtextFilDiscuSP);
-    jfr.add(jsplistuser);
-//    jfr.add(jtfName);
-//    jfr.add(jtfport);
-//    jfr.add(jtfAddr);
-//    jfr.add(jcbtn);
 
-    
-    jfr.setVisible(true);
+    frame.setVisible(true);
 
 
-    // Chat info
-    appendToPane(jtextFilDiscu, "<h4>Possible commands:</h4>"
+    // Chat instruction
+    appendToPane(textPaneMessageBoard, "<h4>Possible commands:</h4>"
         +"<ul>"
         +"<li><b>@nickname</b> - Send private message to user 'nickname'</li>"
         +"<li><b>#d3961b</b> - Change your username color </li>"
@@ -147,7 +165,7 @@ public class ClientGui extends Thread{
         +"</ul><br/>");
 
     // On input chat key pressed
-    jtextInputChat.addKeyListener(new KeyAdapter() {
+    textFieldInputChat.addKeyListener(new KeyAdapter() {
       // send message on Enter
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -156,96 +174,126 @@ public class ClientGui extends Thread{
 
         // Get last message typed
         if (e.getKeyCode() == KeyEvent.VK_UP) {
-          String currentMessage = jtextInputChat.getText().trim();
-          jtextInputChat.setText(oldMsg);
+          String currentMessage = textFieldInputChat.getText().trim();
+          textFieldInputChat.setText(oldMsg);
           oldMsg = currentMessage;
         }
 
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-          String currentMessage = jtextInputChat.getText().trim();
-          jtextInputChat.setText(oldMsg);
+          String currentMessage = textFieldInputChat.getText().trim();
+          textFieldInputChat.setText(oldMsg);
           oldMsg = currentMessage;
         }
       }
     });
 
     // On send button pressed
-    jsbtn.addActionListener(new ActionListener() {
+    buttonSend.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         sendMessage();
       }
     });
 
+    // On log in
+    buttonLogIn.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+
+      }
+    });
+
+    // On register
+    buttonRegister.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+      }
+    });
 
     // On connect
-    jcbtn.addActionListener(new ActionListener() {
+    buttonConnect.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         try {
-          name = jtfName.getText();
-          String port = jtfport.getText();
-          serverName = jtfAddr.getText();
+          //name = jtfName.getText();
+          String port = textFieldServerPort.getText();
+          serverName = textFieldServerIP.getText();
           PORT = Integer.parseInt(port);
 
-          appendToPane(jtextFilDiscu, "<span>Connecting to " + serverName + " on port " + PORT + "...</span>");
+          appendToPane(textPaneMessageBoard, "<span>Connecting to " + serverName + " on port " + PORT + "...</span>");
           server = new Socket(serverName, PORT);
 
-          appendToPane(jtextFilDiscu, "<span>Connected to " +
+          appendToPane(textPaneMessageBoard, "<span>Connected to " +
               server.getRemoteSocketAddress()+"</span>");
 
+          // Get input and output stream to server
           input = new BufferedReader(new InputStreamReader(server.getInputStream()));
           output = new PrintWriter(server.getOutputStream(), true);
-
-          // send nickname to server
-          output.println(name);
 
           // create new Read Thread
           read = new Read();
           read.start();
 
-          // remove log in component
-          jfr.remove(jtfName);
-          jfr.remove(jtfport);
-          jfr.remove(jtfAddr);
-          jfr.remove(jcbtn);
-          jfr.add(jsbtn);
-          jfr.add(jtextInputChatSP);
-          jfr.add(jsbtndeco);
-          jfr.revalidate();
-          jfr.repaint();
-          jtextFilDiscu.setBackground(Color.WHITE);
-          jtextListUsers.setBackground(Color.WHITE);
+          // remove connect component
+          //frame.remove(jtfName);
+          frame.remove(labelServerIP);
+          frame.remove(labelServerPort);
+          frame.remove(textFieldServerPort);
+          frame.remove(textFieldServerIP);
+          frame.remove(buttonConnect);
+
+          // add login component
+          frame.add(labelUsername);
+          frame.add(labelPassword);
+          frame.add(textFieldUsername);
+          frame.add(textFieldPassword);
+          frame.add(buttonLogIn);
+          frame.add(buttonRegister);
+          frame.add(buttonDisconnect);
+
+          frame.revalidate();
+          frame.repaint();
+          textPaneMessageBoard.setBackground(Color.WHITE);
+          textPaneUserList.setBackground(Color.WHITE);
         } catch (Exception ex) {
-          appendToPane(jtextFilDiscu, "<span>Could not connect to Server</span>");
-          JOptionPane.showMessageDialog(jfr, ex.getMessage());
+          appendToPane(textPaneMessageBoard, "<span>Could not connect to server</span>");
+          JOptionPane.showMessageDialog(frame, "Connection refused");
         }
       }
 
     });
 
     // on disconnect
-    jsbtndeco.addActionListener(new ActionListener()  {
+    buttonDisconnect.addActionListener(new ActionListener()  {
       public void actionPerformed(ActionEvent ae) {
 
-        // add log in component
-        jfr.add(jtfName);
-        jfr.add(jtfport);
-        jfr.add(jtfAddr);
-        jfr.add(jcbtn);
+        // add connect component
+        //frame.add(jtfName);
+        frame.add(labelServerIP);
+        frame.add(labelServerPort);
+        frame.add(textFieldServerPort);
+        frame.add(textFieldServerIP);
+        frame.add(buttonConnect);
 
-        // remove chatting component
-        jfr.remove(jsbtn);
-        jfr.remove(jtextInputChatSP);
-        jfr.remove(jsbtndeco);
-        jfr.revalidate();
-        jfr.repaint();
-        jtextListUsers.setText(null);
-        jtextFilDiscu.setBackground(Color.LIGHT_GRAY);
-        jtextListUsers.setBackground(Color.LIGHT_GRAY);
+        // remove login component
+        frame.remove(labelUsername);
+        frame.remove(labelPassword);
+        frame.remove(textFieldUsername);
+        frame.remove(textFieldPassword);
+        frame.remove(buttonLogIn);
+        frame.remove(buttonRegister);
+        frame.remove(buttonDisconnect);
+
+        frame.revalidate();
+        frame.repaint();
+        textPaneUserList.setText(null);
+        textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
+        textPaneUserList.setBackground(Color.LIGHT_GRAY);
 
         // stop read thread
         read.interrupt();
 
-        appendToPane(jtextFilDiscu, "<span>Connection closed.</span>");
+        appendToPane(textPaneMessageBoard, "<span>Connection closed.</span>");
         output.close();
       }
     });
@@ -294,14 +342,14 @@ public class ClientGui extends Thread{
   // Send messages
   public void sendMessage() {
     try {
-      String message = jtextInputChat.getText().trim();
+      String message = textFieldInputChat.getText().trim();
       if (message.equals("")) {
         return;
       }
       this.oldMsg = message;
       output.println(message);
-      jtextInputChat.requestFocus();
-      jtextInputChat.setText(null);
+      textFieldInputChat.requestFocus();
+      textFieldInputChat.setText(null);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null, ex.getMessage());
       System.exit(0);
@@ -326,12 +374,12 @@ public class ClientGui extends Thread{
               ArrayList<String> ListUser = new ArrayList<String>(
                   Arrays.asList(message.split(", "))
                   );
-              jtextListUsers.setText(null);
+              textPaneUserList.setText(null);
               for (String user : ListUser) {
-                appendToPane(jtextListUsers, "@" + user);
+                appendToPane(textPaneUserList, "@" + user);
               }
             }else{
-              appendToPane(jtextFilDiscu, message);
+              appendToPane(textPaneMessageBoard, message);
             }
           }
         }
