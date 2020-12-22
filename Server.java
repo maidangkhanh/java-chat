@@ -66,78 +66,68 @@ public class Server {
       // accepts a new client
       Socket client = server.accept();
       appendToPane(messageBoard, "New client at: " + client.getRemoteSocketAddress() + "\n");
+      while (true){
+        // Get log in or register request
+        String request = (new Scanner(client.getInputStream())).nextLine();
+        ArrayList<String> listRequestDetail = new ArrayList<>(Arrays.asList(request.split("\\|")));
+        PrintWriter output = new PrintWriter(client.getOutputStream(), true);
+        if(listRequestDetail.get(0).equals("LOG_IN"))
+        {
+          // Log in success
+          if(validateLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
+            // create new User
+            User newUser = new User(client,listRequestDetail.get(1));
+            // Log log in event
+            appendToPane(messageBoard, newUser.getNickname()+" has logged in\n");
+            // add newUser message to list
+            this.clients.add(newUser);
 
-      // Get log in or register request
-      String request = (new Scanner(client.getInputStream())).nextLine();
-      ArrayList<String> listRequestDetail = new ArrayList<>(Arrays.asList(request.split("//|")));
-      PrintWriter output = new PrintWriter(client.getOutputStream(), true);
-      if(listRequestDetail.get(0).equals("LOG_IN"))
-      {
-        // Log in success
-        if(validateLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
-          // create new User
-          User newUser = new User(client,listRequestDetail.get(1));
+            // Send log in authorization
+            output.println("LOG_IN_SUCCESS");
 
-          // add newUser message to list
-          this.clients.add(newUser);
+            // Welcome msg
+            newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
 
-          // Send log in authorization
-          output.println("LOG_IN_SUCCESS");
-
-          // Welcome msg
-          newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
-          new Thread(new UserHandler(this, newUser)).start();
+            // create a new thread for newUser incoming messages handling
+            new Thread(new UserHandler(this, newUser)).start();
+            break;
+          }
+          // Log in fail
+          else{
+            output.println("LOG_IN_FAIL");
+            continue;
+          }
         }
-        // Log in fail
-        else{
-          output.println("LOG_IN_FAIL");
+        else if (listRequestDetail.get(0).equals("REGISTER")) {
+          if (validateRegister(listRequestDetail.get(1), listRequestDetail.get(2))) {
+            // create new User
+            User newUser = new User(client, listRequestDetail.get(1));
+            // log register event
+            appendToPane(messageBoard, newUser.getNickname()+" has registered\n");
+
+            // add newUser message to list
+            this.clients.add(newUser);
+
+            // Send log in authorization
+            output.println("REGISTER_SUCCESS");
+
+            // Welcome msg
+            newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
+
+            // create a new thread for newUser incoming messages handling
+            new Thread(new UserHandler(this, newUser)).start();
+            break;
+          } else {
+            output.println("REGISTER_FAIL");
+          }
         }
       }
-      else if (listRequestDetail.get(0).equals("REGISTER"))
-      {
-        if(validateRegister(listRequestDetail.get(1),listRequestDetail.get(2))){
-          // create new User
-          User newUser = new User(client,listRequestDetail.get(1));
-
-          // add newUser message to list
-          this.clients.add(newUser);
-
-          // Send log in authorization
-          output.println("REGISTER_SUCCESS");
-
-          // Welcome msg
-          newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
-          new Thread(new UserHandler(this, newUser)).start();
-        }
-        else{
-          output.println("LOG_IN_FAIL");
-        }
-
-      }
-      output.close();
-
-      String nickname = (new Scanner ( client.getInputStream() )).nextLine();
-      nickname = nickname.replace(",", ""); //  ',' use for serialisation
-      nickname = nickname.replace(" ", "_");
-      appendToPane(messageBoard,"New Client: \"" + nickname + "\"\n\tHost:" + client.getInetAddress().getHostAddress()+"\n");
-
-      // create new User
-      User newUser = new User(client, nickname);
-
-      // add newUser message to list
-      this.clients.add(newUser);
-
-
-      // Welcome msg
-      newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
-
-      // create a new thread for newUser incoming messages handling
-      new Thread(new UserHandler(this, newUser)).start();
     }
   }
 
   // delete a user from the list
   public void removeUser(User user){
+    Server.appendToPane(Server.messageBoard, user.getNickname()+" has log out\n");
     this.clients.remove(user);
   }
 
@@ -209,9 +199,11 @@ public class Server {
       if(checkUserNameAvailability(username))
       {
         BufferedWriter writer = new BufferedWriter(new FileWriter(userDataFileDirectory,true));
-        String line = username+" "+password;
+        String line = username+" "+password+"\n";
         writer.write(line);
+        writer.close();
         return true;
+
       }
     }catch (IOException e)
     {
@@ -222,7 +214,11 @@ public class Server {
 
   // Check if user name is available to register
   public boolean checkUserNameAvailability(String username) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(userDataFileDirectory));
+    File file = new File(userDataFileDirectory);
+    if(!file.exists()) {
+      file.createNewFile();
+    }
+    BufferedReader reader = new BufferedReader(new FileReader(file));
     String line;
     while((line=reader.readLine())!=null){
       String[] combo = line.split(" ");
@@ -279,25 +275,31 @@ class UserHandler implements Runnable {
                 ), user, receiverUsername
               );
         }
-
       // Forward color change
       }else if (message.charAt(0) == '#'){
         user.changeColor(message);
         // notify color change for all other users
         this.server.broadcastAllUsers();
-      }else{
-        // update user list (new user enter chat room | user left chat room)
+      }else if(message.equals("LOG_OUT")){
+        server.removeUser(user);
+        server.broadcastAllUsers();
+      }else if(message.contains("LOGIN|")){
+
+      }
+      else if (message.contains("REGISTER|")){
+
+      }
+      else{
+        // update user list (new user enter chat room)
         server.broadcastMessages(message, user);
       }
     }
     // end of Thread
-    server.removeUser(user);
-    this.server.broadcastAllUsers();
+    server.removeUser(user); // user left chat room
+    this.server.broadcastAllUsers(); // update user list
+    Server.appendToPane(Server.messageBoard, "Connect close at: " + user.client.getRemoteSocketAddress() + "\n");
     sc.close();
   }
-
-
-
 }
 
 class User {
@@ -306,7 +308,7 @@ class User {
   private PrintStream streamOut; // Output stream to client
   private InputStream streamIn; // Input stream from client
   private String nickname; // Displayed name of client
-  private Socket client; // Client socket
+  final public Socket client; // Client socket
   private String color; // Client color
 
   // constructor

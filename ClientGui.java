@@ -96,7 +96,7 @@ public class ClientGui extends Thread{
     textPaneUserList.setBackground(Color.LIGHT_GRAY);
 
     // Input message Field
-    textFieldInputChat.setBounds(0, 350, 400, 50);
+    textFieldInputChat.setBounds(25, 350, 400, 50);
     textFieldInputChat.setFont(font);
     textFieldInputChat.setMargin(new Insets(6, 6, 6, 6));
     final JScrollPane scrollPaneInputChat = new JScrollPane(textFieldInputChat);
@@ -104,7 +104,7 @@ public class ClientGui extends Thread{
 
     // button send
     buttonSend.setFont(font);
-    buttonSend.setBounds(575, 410, 100, 35);
+    buttonSend.setBounds(465,350,100,40);
 
     // button log out
 
@@ -229,6 +229,32 @@ public class ClientGui extends Thread{
       }
     });
 
+    buttonLogOut.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // add log in component
+        frame.add(labelUsername);
+        frame.add(labelPassword);
+        frame.add(textFieldUsername);
+        frame.add(textFieldPassword);
+        frame.add(buttonLogIn);
+        frame.add(buttonRegister);
+        frame.add(buttonDisconnect);
+
+        // remove chatting component
+        frame.remove(textFieldInputChat);
+        frame.remove(buttonLogOut);
+        frame.remove(buttonSend);
+
+        frame.revalidate();
+        frame.repaint();
+
+        textPaneUserList.setText(null);
+        textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
+        textPaneUserList.setBackground(Color.LIGHT_GRAY);
+      }
+    });
+
     // On log in -> register button
     buttonRegister.addActionListener(new ActionListener() {
       @Override
@@ -290,9 +316,6 @@ public class ClientGui extends Thread{
 
         frame.revalidate();
         frame.repaint();
-        textPaneUserList.setText(null);
-        textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
-        textPaneUserList.setBackground(Color.LIGHT_GRAY);
       }
     });
 
@@ -345,7 +368,7 @@ public class ClientGui extends Thread{
 
         } catch (Exception ex) {
           appendToPane(textPaneMessageBoard, "<span>Could not connect to server</span>");
-          JOptionPane.showMessageDialog(frame, "Connection refused");
+          JOptionPane.showMessageDialog(frame, "Can not connect to server");
         }
       }
 
@@ -373,7 +396,7 @@ public class ClientGui extends Thread{
 
         frame.revalidate();
         frame.repaint();
-        textPaneUserList.setText(null);
+
         textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
         textPaneUserList.setBackground(Color.LIGHT_GRAY);
 
@@ -387,43 +410,8 @@ public class ClientGui extends Thread{
 
   }
 
-  // check if if all field are not empty
-  public class TextListener implements DocumentListener{
-    JTextField jtf1;
-    JTextField jtf2;
-    JTextField jtf3;
-    JButton jcbtn;
-
-    public TextListener(JTextField jtf1, JTextField jtf2, JTextField jtf3, JButton jcbtn){
-      this.jtf1 = jtf1;
-      this.jtf2 = jtf2;
-      this.jtf3 = jtf3;
-      this.jcbtn = jcbtn;
-    }
-
-    public void changedUpdate(DocumentEvent e) {}
-
-    public void removeUpdate(DocumentEvent e) {
-      if(jtf1.getText().trim().equals("") ||
-          jtf2.getText().trim().equals("") ||
-          jtf3.getText().trim().equals("")
-          ){
-        jcbtn.setEnabled(false);
-      }else{
-        jcbtn.setEnabled(true);
-      }
-    }
-    public void insertUpdate(DocumentEvent e) {
-      if(jtf1.getText().trim().equals("") ||
-          jtf2.getText().trim().equals("") ||
-          jtf3.getText().trim().equals("")
-          ){
-        jcbtn.setEnabled(false);
-      }else{
-        jcbtn.setEnabled(true);
-      }
-    }
-
+  public static void main(String[] args) throws Exception {
+    ClientGui client = new ClientGui();
   }
 
   // Send messages
@@ -441,10 +429,6 @@ public class ClientGui extends Thread{
       JOptionPane.showMessageDialog(null, ex.getMessage());
       System.exit(0);
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    ClientGui client = new ClientGui();
   }
 
   // read new incoming messages
@@ -481,11 +465,19 @@ public class ClientGui extends Thread{
               frame.remove(buttonLogIn);
               frame.remove(buttonRegister);
               frame.remove(buttonDisconnect);
+
+              frame.revalidate();
+              frame.repaint();
+
+              textPaneMessageBoard.setBackground(Color.WHITE);
+              textPaneUserList.setBackground(Color.WHITE);
+
             }
             // if Server sent a log in fail
             else if(message.equals("LOG_IN_FAIL")){
               JOptionPane.showMessageDialog(frame,"Wrong Username or Password");
             }
+            // if Server sent a register authorization
             else if(message.equals("REGISTER_SUCCESS")){
               // render Chatting Screen
               frame.add(textFieldInputChat);
@@ -501,9 +493,16 @@ public class ClientGui extends Thread{
               frame.remove(textFieldConfirmPassword);
               frame.remove(buttonRegisterRequest);
               frame.remove(buttonRegisterCancel);
+
+              frame.revalidate();
+              frame.repaint();
+
+              textPaneMessageBoard.setBackground(Color.WHITE);
+              textPaneUserList.setBackground(Color.WHITE);
             }
+            // if Server sent a register fail
             else if(message.equals("REGISTER_FAIL")){
-              JOptionPane.showMessageDialog(frame,"Wrong Username already taken");
+              JOptionPane.showMessageDialog(frame,"Username already taken");
             }
             else{
               appendToPane(textPaneMessageBoard, message);
