@@ -17,8 +17,8 @@ import java.util.Arrays;
 public class ClientGui extends Thread{
   private String oldMsg = "";
   private Thread read;
-  private String serverName;
-  private int PORT;
+  private String serverName= "localhost";
+  private int PORT = 12345;
 
   final JFrame frame = new JFrame("Chat");
   final JTextPane textPaneMessageBoard = new JTextPane(); // Message field
@@ -57,9 +57,6 @@ public class ClientGui extends Thread{
   Socket server;
 
   public ClientGui() {
-    this.serverName = "localhost";
-    this.PORT = 12345;
-
     String fontFamily = "Arial, sans-serif";
     Font font = new Font(fontFamily, Font.PLAIN, 15);
 
@@ -259,7 +256,19 @@ public class ClientGui extends Thread{
     buttonRegisterRequest.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-
+        String username = textFieldUsername.getText().trim();
+        String password = new String(textFieldPassword.getPassword()).trim();
+        String confirmPassword = new String(textFieldConfirmPassword.getPassword()).trim();
+        if(username.equals("") || password.equals(""))
+        {
+          JOptionPane.showMessageDialog(frame, "Username and Password must not be empty");
+        }
+        else if(!password.equals(confirmPassword)){
+          JOptionPane.showMessageDialog(frame, "Password confirmation does not match");
+        }
+        else {
+          output.println("REGISTER|"+username+"|"+password);
+        }
       }
     });
 
@@ -294,7 +303,7 @@ public class ClientGui extends Thread{
           //name = jtfName.getText();
           String port = textFieldServerPort.getText().trim();
           serverName = textFieldServerIP.getText().trim();
-          if (serverName.equals("")||port.equals("")) {
+          if (!(serverName.equals("")||port.equals(""))) {
             PORT = Integer.parseInt(port);
 
             appendToPane(textPaneMessageBoard, "<span>Connecting to " + serverName + " on port " + PORT + "...</span>");
@@ -473,8 +482,28 @@ public class ClientGui extends Thread{
               frame.remove(buttonRegister);
               frame.remove(buttonDisconnect);
             }
+            // if Server sent a log in fail
             else if(message.equals("LOG_IN_FAIL")){
               JOptionPane.showMessageDialog(frame,"Wrong Username or Password");
+            }
+            else if(message.equals("REGISTER_SUCCESS")){
+              // render Chatting Screen
+              frame.add(textFieldInputChat);
+              frame.add(buttonSend);
+              frame.add(buttonLogOut);
+
+              // remove register component
+              frame.remove(labelConfirmPassword);
+              frame.remove(labelUsername);
+              frame.remove(labelPassword);
+              frame.remove(textFieldUsername);
+              frame.remove(textFieldPassword);
+              frame.remove(textFieldConfirmPassword);
+              frame.remove(buttonRegisterRequest);
+              frame.remove(buttonRegisterCancel);
+            }
+            else if(message.equals("REGISTER_FAIL")){
+              JOptionPane.showMessageDialog(frame,"Wrong Username already taken");
             }
             else{
               appendToPane(textPaneMessageBoard, message);

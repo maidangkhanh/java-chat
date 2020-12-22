@@ -70,9 +70,9 @@ public class Server {
       // Get log in or register request
       String request = (new Scanner(client.getInputStream())).nextLine();
       ArrayList<String> listRequestDetail = new ArrayList<>(Arrays.asList(request.split("//|")));
+      PrintWriter output = new PrintWriter(client.getOutputStream(), true);
       if(listRequestDetail.get(0).equals("LOG_IN"))
       {
-        PrintWriter output = new PrintWriter(client.getOutputStream(), true);
         // Log in success
         if(validateLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
           // create new User
@@ -92,12 +92,29 @@ public class Server {
         else{
           output.println("LOG_IN_FAIL");
         }
-        output.close();
       }
       else if (listRequestDetail.get(0).equals("REGISTER"))
       {
+        if(validateRegister(listRequestDetail.get(1),listRequestDetail.get(2))){
+          // create new User
+          User newUser = new User(client,listRequestDetail.get(1));
+
+          // add newUser message to list
+          this.clients.add(newUser);
+
+          // Send log in authorization
+          output.println("REGISTER_SUCCESS");
+
+          // Welcome msg
+          newUser.getOutStream().println("<b>Welcome</b> " + newUser.toString());
+          new Thread(new UserHandler(this, newUser)).start();
+        }
+        else{
+          output.println("LOG_IN_FAIL");
+        }
 
       }
+      output.close();
 
       String nickname = (new Scanner ( client.getInputStream() )).nextLine();
       nickname = nickname.replace(",", ""); //  ',' use for serialisation
@@ -187,8 +204,35 @@ public class Server {
 
   // Validate register username and password
   public boolean validateRegister(String username, String password){
+    try
+    {
+      if(checkUserNameAvailability(username))
+      {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(userDataFileDirectory,true));
+        String line = username+" "+password;
+        writer.write(line);
+        return true;
+      }
+    }catch (IOException e)
+    {
+      e.printStackTrace();
+    }
     return false;
   }
+
+  // Check if user name is available to register
+  public boolean checkUserNameAvailability(String username) throws IOException {
+    BufferedReader reader = new BufferedReader(new FileReader(userDataFileDirectory));
+    String line;
+    while((line=reader.readLine())!=null){
+      String[] combo = line.split(" ");
+      if(combo[0].equals(username))
+        return false;
+    }
+    reader.close();
+    return true;
+  }
+
 
 }
 
