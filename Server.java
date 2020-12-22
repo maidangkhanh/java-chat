@@ -74,7 +74,7 @@ public class Server {
       {
         PrintWriter output = new PrintWriter(client.getOutputStream(), true);
         // Log in success
-        if(authorizeLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
+        if(validateLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
           // create new User
           User newUser = new User(client,listRequestDetail.get(1));
 
@@ -166,7 +166,8 @@ public class Server {
     }
   }
 
-  public boolean authorizeLogIn(String username, String password){
+  // Validate log in username and password
+  public boolean validateLogIn(String username, String password){
     try{
       BufferedReader reader = new BufferedReader(new FileReader(userDataFileDirectory));
       String line;
@@ -179,9 +180,16 @@ public class Server {
     }
     catch(IOException e){
       e.printStackTrace();
+      return false;
     }
     return false;
   }
+
+  // Validate register username and password
+  public boolean validateRegister(String username, String password){
+    return false;
+  }
+
 }
 
 class UserHandler implements Runnable {

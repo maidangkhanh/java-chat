@@ -15,18 +15,43 @@ import java.util.Arrays;
 
 
 public class ClientGui extends Thread{
+  private String oldMsg = "";
+  private Thread read;
+  private String serverName;
+  private int PORT;
 
   final JFrame frame = new JFrame("Chat");
   final JTextPane textPaneMessageBoard = new JTextPane(); // Message field
   final JTextPane textPaneUserList = new JTextPane(); // User list field
   final JTextField textFieldInputChat = new JTextField(); // Input message field
-  private String oldMsg = "";
-  private Thread read;
-  private String serverName;
-  private int PORT;
-  private String name;
+  final JButton buttonLogOut = new JButton("Log out");
+  final JButton buttonSend = new JButton("Send");
 
-  int logInState = 0; // 0: not login, 1: Logged in, 2: Log in fail
+
+  // Log in screen
+  final JLabel labelUsername = new JLabel("Username:");
+  final JLabel labelPassword = new JLabel("Password:");
+  final JTextField textFieldUsername = new JTextField();
+  final JPasswordField textFieldPassword = new JPasswordField();
+  final JButton buttonLogIn = new JButton("Log In");
+  final JButton buttonRegister = new JButton("Register");
+  final JButton buttonDisconnect = new JButton("Disconnect");
+
+  // Register screen
+  // reuse label and text field from log in screen
+  final JLabel labelConfirmPassword = new JLabel("Confirm Password:");
+  final JPasswordField textFieldConfirmPassword = new JPasswordField();
+  final JButton buttonRegisterRequest = new JButton("Register");
+  final JButton buttonRegisterCancel = new JButton("Cancel");
+
+  // Connection screen
+  //final JTextField jtfName = new JTextField(this.name);
+  final JLabel labelServerIP = new JLabel("Server IP:");
+  final JLabel labelServerPort = new JLabel("Port:");
+  final JTextField textFieldServerPort = new JTextField(Integer.toString(this.PORT));
+  final JTextField textFieldServerIP = new JTextField(this.serverName);
+  final JButton buttonConnect = new JButton("Connect");
+
   BufferedReader input;
   PrintWriter output;
   Socket server;
@@ -34,7 +59,6 @@ public class ClientGui extends Thread{
   public ClientGui() {
     this.serverName = "localhost";
     this.PORT = 12345;
-    this.name = "nickname";
 
     String fontFamily = "Arial, sans-serif";
     Font font = new Font(fontFamily, Font.PLAIN, 15);
@@ -82,24 +106,15 @@ public class ClientGui extends Thread{
     scrollPaneInputChat.setBounds(25, 350, 650, 50);
 
     // button send
-    final JButton buttonSend = new JButton("Send");
     buttonSend.setFont(font);
     buttonSend.setBounds(575, 410, 100, 35);
 
     // button log out
-    final JButton buttonLogOut = new JButton("Log out");
+
     buttonLogOut.setFont(font);
     buttonLogOut.setBounds(25,410,130,35);
 
 
-    // Log in screen
-    final JLabel labelUsername = new JLabel("Username:");
-    final JLabel labelPassword = new JLabel("Password:");
-    final JTextField textFieldUsername = new JTextField();
-    final JPasswordField textFieldPassword = new JPasswordField();
-    final JButton buttonLogIn = new JButton("Log In");
-    final JButton buttonRegister = new JButton("Register");
-    final JButton buttonDisconnect = new JButton("Disconnect");
 
     // Set log in components positions and fonts
     labelUsername.setBounds(25, 340,135,40);
@@ -115,12 +130,7 @@ public class ClientGui extends Thread{
     buttonDisconnect.setBounds(500, 415, 130, 40);
     buttonDisconnect.setFont(font);
 
-    // Register screen
-    // reuse label and text field from log in screen
-    final JLabel labelConfirmPassword = new JLabel("Confirm Password:");
-    final JPasswordField textFieldConfirmPassword = new JPasswordField();
-    final JButton buttonRegisterRequest = new JButton("Register");
-    final JButton buttonRegisterCancel = new JButton("Cancel");
+
 
     // Set register components positions and fonts
     labelConfirmPassword.setBounds(315,340,135,40);
@@ -133,13 +143,7 @@ public class ClientGui extends Thread{
 
 
 
-    // Connection screen
-    //final JTextField jtfName = new JTextField(this.name);
-    final JLabel labelServerIP = new JLabel("Server IP:");
-    final JLabel labelServerPort = new JLabel("Port:");
-    final JTextField textFieldServerPort = new JTextField(Integer.toString(this.PORT));
-    final JTextField textFieldServerIP = new JTextField(this.serverName);
-    final JButton buttonConnect = new JButton("Connect");
+
 
     // check if those field are not empty
     //jtfName.getDocument().addDocumentListener(new TextListener(jtfName, textFieldServerPort, textFieldServerIP, buttonConnect));
@@ -288,43 +292,47 @@ public class ClientGui extends Thread{
       public void actionPerformed(ActionEvent ae) {
         try {
           //name = jtfName.getText();
-          String port = textFieldServerPort.getText();
-          serverName = textFieldServerIP.getText();
-          PORT = Integer.parseInt(port);
+          String port = textFieldServerPort.getText().trim();
+          serverName = textFieldServerIP.getText().trim();
+          if (serverName.equals("")||port.equals("")) {
+            PORT = Integer.parseInt(port);
 
-          appendToPane(textPaneMessageBoard, "<span>Connecting to " + serverName + " on port " + PORT + "...</span>");
-          server = new Socket(serverName, PORT);
+            appendToPane(textPaneMessageBoard, "<span>Connecting to " + serverName + " on port " + PORT + "...</span>");
+            server = new Socket(serverName, PORT);
 
-          appendToPane(textPaneMessageBoard, "<span>Connected to " +
-              server.getRemoteSocketAddress()+"</span>");
+            appendToPane(textPaneMessageBoard, "<span>Connected to " +
+                    server.getRemoteSocketAddress() + "</span>");
 
-          // Get input and output stream to server
-          input = new BufferedReader(new InputStreamReader(server.getInputStream()));
-          output = new PrintWriter(server.getOutputStream(), true);
+            // Get input and output stream to server
+            input = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            output = new PrintWriter(server.getOutputStream(), true);
 
-          // create new Read Thread
-          read = new Read();
-          read.start();
+            // create new Read Thread
+            read = new Read();
+            read.start();
 
-          // remove connect component
-          //frame.remove(jtfName);
-          frame.remove(labelServerIP);
-          frame.remove(labelServerPort);
-          frame.remove(textFieldServerPort);
-          frame.remove(textFieldServerIP);
-          frame.remove(buttonConnect);
+            // remove connect component
+            frame.remove(labelServerIP);
+            frame.remove(labelServerPort);
+            frame.remove(textFieldServerPort);
+            frame.remove(textFieldServerIP);
+            frame.remove(buttonConnect);
 
-          // add login component
-          frame.add(labelUsername);
-          frame.add(labelPassword);
-          frame.add(textFieldUsername);
-          frame.add(textFieldPassword);
-          frame.add(buttonLogIn);
-          frame.add(buttonRegister);
-          frame.add(buttonDisconnect);
+            // add login component
+            frame.add(labelUsername);
+            frame.add(labelPassword);
+            frame.add(textFieldUsername);
+            frame.add(textFieldPassword);
+            frame.add(buttonLogIn);
+            frame.add(buttonRegister);
+            frame.add(buttonDisconnect);
 
-          frame.revalidate();
-          frame.repaint();
+            frame.revalidate();
+            frame.repaint();
+          }
+          else{
+            JOptionPane.showMessageDialog(frame,"Server IP and Port must not be empty");
+          }
 
         } catch (Exception ex) {
           appendToPane(textPaneMessageBoard, "<span>Could not connect to server</span>");
@@ -339,7 +347,6 @@ public class ClientGui extends Thread{
       public void actionPerformed(ActionEvent ae) {
 
         // add connect component
-        //frame.add(jtfName);
         frame.add(labelServerIP);
         frame.add(labelServerPort);
         frame.add(textFieldServerPort);
@@ -453,6 +460,18 @@ public class ClientGui extends Thread{
             // if Server sent a log in authorization
             else if(message.equals("LOG_IN_SUCCESS")){
               // render Chatting Screen
+              frame.add(textFieldInputChat);
+              frame.add(buttonSend);
+              frame.add(buttonLogOut);
+
+              // remove login component
+              frame.remove(labelUsername);
+              frame.remove(labelPassword);
+              frame.remove(textFieldUsername);
+              frame.remove(textFieldPassword);
+              frame.remove(buttonLogIn);
+              frame.remove(buttonRegister);
+              frame.remove(buttonDisconnect);
             }
             else if(message.equals("LOG_IN_FAIL")){
               JOptionPane.showMessageDialog(frame,"Wrong Username or Password");
