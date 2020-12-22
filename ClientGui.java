@@ -229,17 +229,16 @@ public class ClientGui extends Thread{
       }
     });
 
+    // On log out
     buttonLogOut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        // add log in component
-        frame.add(labelUsername);
-        frame.add(labelPassword);
-        frame.add(textFieldUsername);
-        frame.add(textFieldPassword);
-        frame.add(buttonLogIn);
-        frame.add(buttonRegister);
-        frame.add(buttonDisconnect);
+        // add connect component
+        frame.add(labelServerIP);
+        frame.add(labelServerPort);
+        frame.add(textFieldServerPort);
+        frame.add(textFieldServerIP);
+        frame.add(buttonConnect);
 
         // remove chatting component
         frame.remove(textFieldInputChat);
@@ -252,6 +251,12 @@ public class ClientGui extends Thread{
         textPaneUserList.setText(null);
         textPaneMessageBoard.setBackground(Color.LIGHT_GRAY);
         textPaneUserList.setBackground(Color.LIGHT_GRAY);
+
+        // stop read thread
+        read.interrupt();
+
+        appendToPane(textPaneMessageBoard, "<span>Connection closed.</span>");
+        output.close();
       }
     });
 

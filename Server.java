@@ -71,8 +71,7 @@ public class Server {
         String request = (new Scanner(client.getInputStream())).nextLine();
         ArrayList<String> listRequestDetail = new ArrayList<>(Arrays.asList(request.split("\\|")));
         PrintWriter output = new PrintWriter(client.getOutputStream(), true);
-        if(listRequestDetail.get(0).equals("LOG_IN"))
-        {
+        if(listRequestDetail.get(0).equals("LOG_IN")) {
           // Log in success
           if(validateLogIn(listRequestDetail.get(1),listRequestDetail.get(2))){
             // create new User
@@ -229,6 +228,9 @@ public class Server {
     return true;
   }
 
+  public List<User> getClients(){
+    return clients;
+  }
 
 }
 
@@ -275,19 +277,16 @@ class UserHandler implements Runnable {
                 ), user, receiverUsername
               );
         }
-      // Forward color change
-      }else if (message.charAt(0) == '#'){
+
+      }// Forward color change
+      else if (message.charAt(0) == '#'){
         user.changeColor(message);
         // notify color change for all other users
         this.server.broadcastAllUsers();
-      }else if(message.equals("LOG_OUT")){
+      }
+      else if(message.equals("LOG_OUT")){
         server.removeUser(user);
         server.broadcastAllUsers();
-      }else if(message.contains("LOGIN|")){
-
-      }
-      else if (message.contains("REGISTER|")){
-
       }
       else{
         // update user list (new user enter chat room)
